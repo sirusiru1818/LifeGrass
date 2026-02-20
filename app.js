@@ -128,11 +128,90 @@
         }
 
         cellsWrap.appendChild(cell);
+        
+        // 클릭 이벤트 추가
+        cell.addEventListener("click", function() {
+          openWeekModal(birthYear, i);
+        });
       }
 
       row.appendChild(cellsWrap);
       bodyEl.appendChild(row);
     }
+  }
+
+  function getYearAndWeekFromIndex(birthYear, index) {
+    const year = birthYear + Math.floor(index / WEEKS_PER_YEAR);
+    const week = index % WEEKS_PER_YEAR;
+    return { year, week };
+  }
+
+  function generateAIInsight(journalData) {
+    if (!journalData || (!journalData.text && !journalData.keywords)) {
+      return "No journal entry for this week.";
+    }
+    
+    const text = journalData.text || "";
+    const keywords = journalData.keywords || "";
+    
+    // 간단한 키워드 기반 분석 (실제로는 AI API 호출)
+    const lowerText = text.toLowerCase();
+    const lowerKeywords = keywords.toLowerCase();
+    
+    if (lowerText.includes("learn") || lowerText.includes("study") || lowerKeywords.includes("learn")) {
+      return "A week focused on growth and learning. Keep nurturing your curiosity!";
+    } else if (lowerText.includes("work") || lowerText.includes("project") || lowerKeywords.includes("work")) {
+      return "Productive week with meaningful progress. Your dedication shows.";
+    } else if (lowerText.includes("friend") || lowerText.includes("family") || lowerKeywords.includes("friend")) {
+      return "A week enriched by connections. Relationships are life's greatest treasures.";
+    } else if (lowerText.includes("rest") || lowerText.includes("relax") || lowerKeywords.includes("rest")) {
+      return "A week of rest and recovery. Taking care of yourself is important.";
+    } else if (lowerText.includes("challenge") || lowerText.includes("difficult") || lowerKeywords.includes("challenge")) {
+      return "A challenging week that built resilience. You're stronger than you think.";
+    } else if (text.length > 100) {
+      return "A reflective week with deep thoughts. Your introspection is valuable.";
+    } else if (keywords) {
+      return `A week marked by: ${keywords}. Each moment shapes your journey.`;
+    } else {
+      return "A week captured in your memory. Every week adds to your story.";
+    }
+  }
+
+  function openWeekModal(birthYear, index) {
+    const { year, week } = getYearAndWeekFromIndex(birthYear, index);
+    const journalData = getJournal(year, week);
+    
+    const modal = document.getElementById("weekModal");
+    const titleEl = document.getElementById("modalTitle");
+    const keywordsEl = document.getElementById("modalKeywords");
+    const journalEl = document.getElementById("modalJournal");
+    const insightEl = document.getElementById("modalInsight");
+    
+    if (!modal || !titleEl || !keywordsEl || !journalEl || !insightEl) return;
+    
+    // 제목 설정
+    titleEl.textContent = `Week ${week + 1}, ${year}`;
+    
+    // 일기 내용
+    if (journalData) {
+      keywordsEl.textContent = journalData.keywords || "No keywords";
+      journalEl.textContent = journalData.text || "No journal entry.";
+    } else {
+      keywordsEl.textContent = "No keywords";
+      journalEl.textContent = "No journal entry for this week.";
+    }
+    
+    // AI 분석
+    const insight = generateAIInsight(journalData);
+    insightEl.textContent = insight;
+    
+    // 모달 표시
+    modal.style.display = "flex";
+  }
+
+  function closeWeekModal() {
+    const modal = document.getElementById("weekModal");
+    if (modal) modal.style.display = "none";
   }
 
   function updateWeekLabel(birthYear) {
@@ -205,6 +284,27 @@
 
     const plantBtn = document.getElementById("btnPlant");
     if (plantBtn) plantBtn.addEventListener("click", plant);
+
+    // 모달 닫기 이벤트
+    const modalClose = document.getElementById("modalClose");
+    if (modalClose) modalClose.addEventListener("click", closeWeekModal);
+
+    const modalOverlay = document.getElementById("weekModal");
+    if (modalOverlay) {
+      modalOverlay.addEventListener("click", function(e) {
+        if (e.target === modalOverlay) closeWeekModal();
+      });
+    }
+
+    // ESC 키로 모달 닫기
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        const modal = document.getElementById("weekModal");
+        if (modal && modal.style.display !== "none") {
+          closeWeekModal();
+        }
+      }
+    });
   }
 
   if (document.readyState === "loading") {
