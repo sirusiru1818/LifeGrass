@@ -58,6 +58,14 @@ body {
   color: var(--accent);
 }
 
+.user-display {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--grass-filled);
+  margin-left: 0.5rem;
+}
+
 .birth-set {
   display: inline-flex;
   align-items: center;
@@ -396,6 +404,22 @@ section h2 {
   margin: 0;
 }
 
+.recommend-box .recommend-line {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.recommend-box .recommend-line:last-child {
+  margin-bottom: 0;
+}
+
+.recommend-box .recommend-error {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
 /* Footer */
 .footer {
   text-align: center;
@@ -525,4 +549,180 @@ section h2 {
   box-shadow: 0 0 0 2px var(--accent);
   z-index: 10;
   position: relative;
+}
+
+/* Auth Modal */
+.auth-modal {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.auth-content {
+  max-width: 380px;
+  text-align: center;
+}
+
+.auth-title {
+  margin: 1.5rem 1.5rem 0.5rem;
+  padding-right: 0;
+}
+
+.auth-subtitle {
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  margin: 0 1.5rem 1.5rem;
+  line-height: 1.5;
+}
+
+.auth-form {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--grass-past);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--bg);
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.auth-error {
+  color: #d93025;
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+  min-height: 1.25rem;
+}
+
+.btn-auth {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-auth:hover {
+  background: var(--grass-current);
+}
+
+.btn-auth:disabled {
+  background: var(--grass-past);
+  cursor: not-allowed;
+}
+
+.wrap.locked {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Modal Write Section */
+.modal-recommend-box {
+  min-height: 2rem;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+}
+
+.modal-recommend-box .placeholder {
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.modal-recommend-box .recommend-line {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.modal-recommend-box .recommend-line:last-child {
+  margin-bottom: 0;
+}
+
+.modal-recommend-box .recommend-error {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
+.btn-write {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.5rem;
+}
+
+.btn-write:hover {
+  background: var(--grass-current);
+}
+
+.btn-write:focus-visible {
+  outline: 2px solid var(--grass-current);
+  outline-offset: 2px;
+}
+
+/* Modal Edit Section */
+.modal-section input,
+.modal-section textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--grass-past);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  background: var(--bg);
+}
+
+.modal-section input:focus,
+.modal-section textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.modal-section .btn-plant {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--grass-filled);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal-section .btn-plant:hover {
+  background: var(--grass-current);
+}
+
+.modal-section .btn-plant:focus-visible {
+  outline: 2px solid var(--grass-current);
+  outline-offset: 2px;
+}
+
+/* Password Check Modal */
+.password-check-modal {
+  z-index: 2000;
 }

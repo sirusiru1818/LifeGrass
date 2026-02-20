@@ -12,7 +12,7 @@
 <body>
   <div class="wrap">
     <header class="header">
-      <h1 class="title">LifeGrass</h1>
+      <h1 class="title">LifeGrass <span class="user-display" id="userDisplay"></span></h1>
       <div class="birth-set">
         <label for="birthYear">Birth year</label>
         <input type="number" id="birthYear" min="1920" max="2020" value="1995" />
@@ -34,14 +34,6 @@
           <span class="legend-item"><span class="legend-dot current"></span>This week</span>
           <span class="legend-item"><span class="legend-dot filled"></span>Journaled</span>
         </div>
-      </section>
-
-      <section class="journal-section">
-        <h2>This week's journal</h2>
-        <p class="week-label" id="weekLabel"></p>
-        <input type="text" id="weekKeywords" placeholder="Keywords for this week (comma-separated)" />
-        <textarea id="weekJournal" placeholder="What you did, learned, and felt this week." rows="4"></textarea>
-        <button type="button" class="btn-plant" id="btnPlant">🌱 Plant</button>
       </section>
 
       <section class="recommend-section">
@@ -69,9 +61,45 @@
           <p class="modal-journal" id="modalJournal"></p>
         </div>
         <div class="modal-section">
-          <h4>AI Insight</h4>
+          <h4>AI Comment</h4>
           <p class="modal-insight" id="modalInsight"></p>
         </div>
+        <div class="modal-section" id="modalWriteSection" style="display: none;">
+          <button type="button" class="btn-write" id="btnWrite" style="display: none;">✏️ Write</button>
+        </div>
+        <div class="modal-section" id="modalEditSection" style="display: none;">
+          <h4>Write/Edit Journal</h4>
+          <input type="text" id="modalWeekKeywords" placeholder="Keywords for this week (comma-separated)" />
+          <textarea id="modalWeekJournal" placeholder="What you did, learned, and felt this week." rows="4"></textarea>
+          <button type="button" class="btn-plant" id="btnModalPlant">🌱 Plant</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Check Modal (for writing in modal) -->
+  <div class="modal-overlay password-check-modal" id="passwordCheckModal" style="display: none;">
+    <div class="modal-content auth-content">
+      <h3 class="modal-title auth-title">Password Required</h3>
+      <p class="auth-subtitle">Enter your password to write or edit this week's journal.</p>
+      <div class="auth-form">
+        <input type="password" id="passwordCheckInput" placeholder="Enter password" autocomplete="current-password" />
+        <p class="auth-error" id="passwordCheckError"></p>
+        <button type="button" class="btn-auth" id="btnPasswordCheck">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay auth-modal" id="authModal" style="display: none;">
+    <div class="modal-content auth-content">
+      <h3 class="modal-title auth-title" id="authTitle">Welcome</h3>
+      <p class="auth-subtitle" id="authSubtitle"></p>
+      <div class="auth-form">
+        <input type="password" id="authPassword" placeholder="Enter password" autocomplete="new-password" />
+        <input type="password" id="authPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" style="display: none;" />
+        <p class="auth-error" id="authError"></p>
+        <button type="button" class="btn-auth" id="btnAuth">Continue</button>
       </div>
     </div>
   </div>

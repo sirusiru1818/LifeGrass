@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeGrass - Your Life in Weeks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-dim: #8b949e;
+      --accent: #238636;
+      --accent-hover: #2ea043;
+      --grass-1: #0e4429;
+      --grass-2: #006d32;
+      --grass-3: #26a641;
+      --grass-4: #39d353;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .landing-wrap {
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 600;
+      color: var(--grass-4);
+      margin-bottom: 0.5rem;
+    }
+    .tagline {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    .grass-preview {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .grass-preview .cell {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      background: var(--grass-1);
+    }
+    .grass-preview .cell:nth-child(3n) { background: var(--grass-2); }
+    .grass-preview .cell:nth-child(5n) { background: var(--grass-3); }
+    .grass-preview .cell:nth-child(7n) { background: var(--grass-4); }
+    .grass-preview .cell:nth-child(11n) { background: var(--border); }
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+    .form-card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+    .input-group {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .input-group input {
+      flex: 1;
+      padding: 0.875rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-group input:focus {
+      border-color: var(--accent);
+    }
+    .input-group input::placeholder {
+      color: var(--text-dim);
+    }
+    .btn-start {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-start:hover {
+      background: var(--accent-hover);
+    }
+    .error-msg {
+      color: #f85149;
+      font-size: 0.875rem;
+      margin-top: 0.75rem;
+      display: none;
+    }
+    .footer-note {
+      margin-top: 2rem;
+      font-size: 0.875rem;
+      color: var(--text-dim);
+    }
+    .footer-note em {
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="landing-wrap">
+    <h1 class="logo">LifeGrass</h1>
+    <p class="tagline">Visualize your life in weeks. Plant memories, grow insights.</p>
+    
+    <div class="grass-preview">
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    
+    <div class="form-card">
+      <h2>Enter your username to start</h2>
+      <div class="input-group">
+        <input type="text" id="usernameInput" placeholder="e.g., johndoe" maxlength="50" autocomplete="off" />
+      </div>
+      <button type="button" class="btn-start" id="btnStart">Start My Journey</button>
+      <p class="error-msg" id="errorMsg"></p>
+    </div>
+    
+    <p class="footer-note">Inspired by Oliver Burkeman's <em>Four Thousand Weeks</em></p>
+  </div>
+  
+  <script>
+    (function() {
+      const input = document.getElementById("usernameInput");
+      const btn = document.getElementById("btnStart");
+      const errorMsg = document.getElementById("errorMsg");
+      
+      function validateAndGo() {
+        const raw = input.value.trim();
+        const username = raw.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+        
+        if (!username || username.length < 2) {
+          errorMsg.textContent = "Username must be at least 2 characters (letters, numbers, - or _)";
+          errorMsg.style.display = "block";
+          return;
+        }
+        
+        if (username !== raw.toLowerCase()) {
+          errorMsg.textContent = "Username can only contain letters, numbers, hyphens, and underscores";
+          errorMsg.style.display = "block";
+          return;
+        }
+        
+        window.location.href = "/" + username;
+      }
+      
+      btn.addEventListener("click", validateAndGo);
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") validateAndGo();
+      });
+      input.addEventListener("input", function() {
+        errorMsg.style.display = "none";
+      });
+      
+      input.focus();
+    })();
+  </script>
+</body>
+</html>
