@@ -296,9 +296,8 @@ section h2 {
   min-height: 0;
 }
 
-.cell.past {
-  background: var(--grass-past);
-}
+/* 지나간 주는 기본 색상 유지 (일기를 쓰지 않은 경우) */
+/* .cell.past 스타일 제거 - 일기를 쓰지 않은 지나간 주는 빈 색상 */
 
 .cell.filled {
   background: var(--grass-filled);

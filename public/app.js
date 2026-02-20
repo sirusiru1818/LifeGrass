@@ -220,7 +220,7 @@
 
   async function generateAIComment(journalData, year, week) {
     if (!journalData || (!journalData.text && !journalData.keywords)) {
-      return "No journal entry for this week.";
+      return "일기를 작성하면 AI가 감성적인 멘트를 남겨드려요.";
     }
     
     const text = journalData.text || "";
@@ -239,13 +239,14 @@
       });
       
       if (!res.ok) {
-        throw new Error("Failed to generate comment");
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || "Failed to generate comment");
       }
       
       const data = await res.json();
       const comment = (data.comment || "").trim();
       
-      if (comment) {
+      if (comment && comment !== "A week captured in your memory.") {
         // 여러 줄이면 첫 번째 줄만 사용
         return comment.split(/\n/)[0].trim();
       }
@@ -253,33 +254,111 @@
       // 폴백: 간단한 규칙 기반 댓글
       return generateFallbackComment(journalData);
     } catch (e) {
+      console.error("AI comment generation error:", e);
       return generateFallbackComment(journalData);
     }
   }
 
   function generateFallbackComment(journalData) {
+    if (!journalData || (!journalData.text && !journalData.keywords)) {
+      return "A quiet week, but every moment matters in your journey.";
+    }
+    
     const text = journalData.text || "";
     const keywords = journalData.keywords || "";
     const lowerText = text.toLowerCase();
     const lowerKeywords = keywords.toLowerCase();
     
-    if (lowerText.includes("learn") || lowerText.includes("study") || lowerKeywords.includes("learn")) {
-      return "A week focused on growth and learning. Keep nurturing your curiosity!";
-    } else if (lowerText.includes("work") || lowerText.includes("project") || lowerKeywords.includes("work")) {
-      return "Productive week with meaningful progress. Your dedication shows.";
-    } else if (lowerText.includes("friend") || lowerText.includes("family") || lowerKeywords.includes("friend")) {
-      return "A week enriched by connections. Relationships are life's greatest treasures.";
-    } else if (lowerText.includes("rest") || lowerText.includes("relax") || lowerKeywords.includes("rest")) {
-      return "A week of rest and recovery. Taking care of yourself is important.";
-    } else if (lowerText.includes("challenge") || lowerText.includes("difficult") || lowerKeywords.includes("challenge")) {
-      return "A challenging week that built resilience. You're stronger than you think.";
-    } else if (text.length > 100) {
-      return "A reflective week with deep thoughts. Your introspection is valuable.";
-    } else if (keywords) {
-      return `A week marked by: ${keywords}. Each moment shapes your journey.`;
-    } else {
-      return "A week captured in your memory. Every week adds to your story.";
+    // 감성적인 한 줄 멘트들
+    const comments = [];
+    
+    // 학습/성장 관련
+    if (lowerText.includes("learn") || lowerText.includes("study") || lowerText.includes("growth") || lowerKeywords.includes("learn")) {
+      comments.push("새로운 것을 배우는 한 주였네요. 성장의 발걸음이 느껴집니다.");
+      comments.push("지식의 씨앗을 심은 한 주, 곧 아름다운 열매가 열릴 거예요.");
+      comments.push("배움의 여정 속에서 한 걸음 더 나아간 당신이 멋져요.");
     }
+    
+    // 일/프로젝트 관련
+    if (lowerText.includes("work") || lowerText.includes("project") || lowerText.includes("productive") || lowerKeywords.includes("work")) {
+      comments.push("의미 있는 일에 집중한 한 주, 그 노력이 빛을 발할 거예요.");
+      comments.push("목표를 향해 한 걸음씩 나아가는 당신의 모습이 인상적이에요.");
+      comments.push("작은 성취들이 모여 큰 변화를 만들어낼 거예요.");
+    }
+    
+    // 사람/관계 관련
+    if (lowerText.includes("friend") || lowerText.includes("family") || lowerText.includes("love") || lowerKeywords.includes("friend") || lowerKeywords.includes("family")) {
+      comments.push("소중한 사람들과 함께한 시간이 따뜻한 추억이 되었겠어요.");
+      comments.push("관계 속에서 얻은 따뜻함이 이번 주를 특별하게 만들었네요.");
+      comments.push("함께한 순간들이 인생의 보물이 되어 간직될 거예요.");
+    }
+    
+    // 휴식/회복 관련
+    if (lowerText.includes("rest") || lowerText.includes("relax") || lowerText.includes("recharge") || lowerKeywords.includes("rest")) {
+      comments.push("잠시 멈춰서 자신을 돌아본 한 주, 그 여유가 필요했을 거예요.");
+      comments.push("휴식도 성장의 일부예요. 잘 쉬어가고 계신가요?");
+      comments.push("바쁜 일상 속에서도 자신을 돌보는 시간을 가진 당신이 대단해요.");
+    }
+    
+    // 도전/어려움 관련
+    if (lowerText.includes("challenge") || lowerText.includes("difficult") || lowerText.includes("hard") || lowerText.includes("struggle") || lowerKeywords.includes("challenge")) {
+      comments.push("어려움을 견뎌낸 당신의 모습이 정말 멋져요. 강인함이 느껴집니다.");
+      comments.push("힘든 순간도 성장의 밑거름이 되어 당신을 더 단단하게 만들어요.");
+      comments.push("도전 앞에서 포기하지 않은 당신, 그 용기가 빛나요.");
+    }
+    
+    // 성취/축하 관련
+    if (lowerText.includes("success") || lowerText.includes("achieve") || lowerText.includes("complete") || lowerText.includes("finish") || lowerKeywords.includes("success")) {
+      comments.push("목표를 이루어낸 한 주, 정말 축하해요! 그 기쁨을 만끽하세요.");
+      comments.push("작은 성취도 큰 의미가 있어요. 당신의 노력을 응원해요.");
+      comments.push("한 걸음씩 나아가는 당신의 모습이 자랑스러워요.");
+    }
+    
+    // 여행/모험 관련
+    if (lowerText.includes("travel") || lowerText.includes("adventure") || lowerText.includes("trip") || lowerKeywords.includes("travel")) {
+      comments.push("새로운 곳에서 얻은 경험이 인생의 색깔을 더해주었겠어요.");
+      comments.push("여행의 추억이 마음속에 오래도록 남을 거예요.");
+      comments.push("모험의 한 주, 그 경험이 당신을 더 넓게 만들어요.");
+    }
+    
+    // 감정/느낌 관련
+    if (lowerText.includes("happy") || lowerText.includes("joy") || lowerText.includes("smile") || lowerText.includes("laugh")) {
+      comments.push("행복한 순간들이 이번 주를 빛나게 만들었네요. 그 기쁨이 계속되길 바라요.");
+      comments.push("웃음이 가득했던 한 주, 그 에너지가 전해져요.");
+      comments.push("작은 행복들로 가득 찬 한 주였네요. 그 따뜻함이 느껴집니다.");
+    }
+    
+    if (lowerText.includes("sad") || lowerText.includes("difficult") || lowerText.includes("tough") || lowerText.includes("hard")) {
+      comments.push("힘든 한 주였을 수도 있지만, 그 감정도 소중한 경험이에요.");
+      comments.push("어려운 시간을 보내고 계신가요? 당신은 혼자가 아니에요.");
+      comments.push("힘든 순간도 지나가고, 더 나은 날들이 기다리고 있을 거예요.");
+    }
+    
+    // 긴 텍스트 (깊은 사고)
+    if (text.length > 150) {
+      comments.push("깊이 있게 생각해본 한 주, 그 성찰이 당신을 더 현명하게 만들어요.");
+      comments.push("생각이 많은 한 주였네요. 그 고민들이 결실을 맺을 거예요.");
+      comments.push("내면을 들여다본 시간이 당신의 성장에 도움이 될 거예요.");
+    }
+    
+    // 키워드만 있는 경우
+    if (keywords && !text) {
+      const keywordList = keywords.split(",").slice(0, 2).join(", ");
+      comments.push(`${keywordList}로 채워진 한 주, 그 순간들이 소중해요.`);
+      comments.push(`${keywordList}가 이번 주의 키워드였네요. 그 의미를 간직하세요.`);
+    }
+    
+    // 기본 메시지들 (위 조건에 해당하지 않는 경우)
+    if (comments.length === 0) {
+      comments.push("한 주를 보내며 쌓인 경험이 당신의 이야기가 되어가고 있어요.");
+      comments.push("작은 순간들도 모이면 큰 의미가 되죠. 이번 주도 소중했어요.");
+      comments.push("시간이 흘러도 이 순간의 감정은 기억에 남을 거예요.");
+      comments.push("한 주를 마무리하며 느낀 것들이 당신을 더 풍부하게 만들어요.");
+      comments.push("매 순간이 특별해요. 이번 주도 그랬을 거예요.");
+    }
+    
+    // 랜덤하게 하나 선택
+    return comments[Math.floor(Math.random() * comments.length)];
   }
 
   function isCurrentWeek(birthYear, index) {
@@ -305,19 +384,30 @@
     
     titleEl.textContent = `Week ${week + 1}, ${year}`;
     
-    if (journalData) {
+    if (journalData && (journalData.text || journalData.keywords)) {
       keywordsEl.textContent = journalData.keywords || "No keywords";
       journalEl.textContent = journalData.text || "No journal entry.";
-      // 저장된 AI Comment가 있으면 표시, 없으면 기본 메시지
+      // 저장된 AI Comment가 있으면 표시, 없으면 AI로 생성
       if (journalData.aiComment) {
         insightEl.textContent = journalData.aiComment;
       } else {
-        insightEl.textContent = "No journal entry for this week.";
+        // AI Comment 생성
+        insightEl.textContent = "AI 코멘트 생성 중...";
+        generateAIComment(journalData, year, week)
+          .then(function(comment) {
+            insightEl.textContent = comment;
+            // 생성된 코멘트 저장
+            setJournal(year, week, { ...journalData, aiComment: comment });
+            saveStateToServer();
+          })
+          .catch(function() {
+            insightEl.textContent = generateFallbackComment(journalData);
+          });
       }
     } else {
       keywordsEl.textContent = "No keywords";
       journalEl.textContent = "No journal entry for this week.";
-      insightEl.textContent = "No journal entry for this week.";
+      insightEl.textContent = "일기를 작성하면 AI가 감성적인 멘트를 남겨드려요.";
     }
     
     // 오늘이 포함된 주인 경우 글쓰기 섹션 표시
@@ -681,12 +771,45 @@
     }
   }
 
+  function clearUserLocalStorage() {
+    // 해당 유저의 모든 localStorage 데이터 삭제
+    const keys = [
+      getStorageKey("birthYear"),
+      getStorageKey("filledWeeks"),
+      getStorageKey("journal"),
+      getTokenKey(),
+    ];
+    keys.forEach(key => {
+      if (key) localStorage.removeItem(key);
+    });
+    AUTH_TOKEN = null;
+  }
+
   async function checkAuthAndInit() {
     if (!USERNAME) {
       window.location.href = "/";
       return;
     }
 
+    // 먼저 유저 존재 여부 확인
+    try {
+      const checkRes = await fetch(`/api/auth/check/${USERNAME}`);
+      const checkData = await checkRes.json();
+      
+      if (!checkData.exists) {
+        // 유저가 존재하지 않으면 모든 데이터 초기화
+        clearUserLocalStorage();
+        showAuthModal(true);
+        return;
+      }
+    } catch (e) {
+      // 체크 실패 시에도 새 유저로 간주
+      clearUserLocalStorage();
+      showAuthModal(true);
+      return;
+    }
+
+    // 유저가 존재하면 토큰 확인
     loadToken();
 
     if (AUTH_TOKEN) {
@@ -696,12 +819,22 @@
           initApp();
           return;
         }
+        // 401 또는 404면 토큰 무효 또는 유저 삭제됨
+        if (res.status === 401 || res.status === 404) {
+          clearUserLocalStorage();
+          // 다시 유저 존재 여부 확인
+          const checkRes = await fetch(`/api/auth/check/${USERNAME}`);
+          const checkData = await checkRes.json();
+          showAuthModal(!checkData.exists);
+          return;
+        }
         clearToken();
       } catch (e) {
         clearToken();
       }
     }
 
+    // 토큰이 없으면 로그인 모달 표시
     try {
       const res = await fetch(`/api/auth/check/${USERNAME}`);
       const data = await res.json();

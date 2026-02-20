@@ -7,7 +7,8 @@
     "start": "node server.js",
     "admin": "node admin-server.js",
     "dev": "node server.js & node admin-server.js",
-    "start:all": "node server.js & node admin-server.js"
+    "start:all": "node server.js & node admin-server.js",
+    "generate:sample": "node scripts/generate-sample-data.js"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.17.0",

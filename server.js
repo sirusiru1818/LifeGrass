@@ -266,6 +266,12 @@ app.get("/api/data/:username", async (req, res) => {
     return res.status(503).json({ error: "Storage not configured", message: "Set AZURE_STORAGE_CONNECTION_STRING in .env" });
   }
   
+  // 먼저 유저 존재 여부 확인
+  const exists = await userExists(username);
+  if (!exists) {
+    return res.status(404).json({ error: "User not found" });
+  }
+  
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
   const authUser = verifyToken(token);
@@ -381,28 +387,28 @@ app.post("/api/comment", async (req, res) => {
   
   if (!journalText && !keywordsText) {
     return res.json({ 
-      comment: "No journal entry for this week." 
+      comment: "일기를 작성하면 AI가 감성적인 멘트를 남겨드려요." 
     });
   }
   
   let prompt;
   if (isResponsesAPI(chatUrl)) {
     const contextParts = [];
-    if (keywordsText) contextParts.push(`Keywords: ${keywordsText}`);
-    if (journalText) contextParts.push(`Journal entry: ${journalText}`);
+    if (keywordsText) contextParts.push(`이번 주 키워드: ${keywordsText}`);
+    if (journalText) contextParts.push(`일기 내용:\n${journalText}`);
     
-    prompt = `You are reading a weekly journal entry from Week ${week}, ${year}. Read through the person's week and write a warm, emotional one-line summary or reflection. It should capture the feelings, mood, and essence of this week. Be empathetic, personal, and emotionally resonant. Like a friend who truly understands what this week meant to them. Keep it to ONE SENTENCE ONLY. Make it feel genuine and heartfelt.
+    prompt = `${year}년 ${week}주차의 일기를 읽고 이번 주에 대한 감성적인 한 줄 감상을 작성해주세요. 일기의 감정과 분위기를 담아 따뜻하고 진심이 느껴지는 멘트로 작성해주세요. 축하할 일이 있으면 축하하고, 안타까운 일이 있으면 공감해주세요. 반드시 한 문장으로만 작성하고, 자연스럽고 진솔한 말투로 작성해주세요.
 
 ${contextParts.join("\n\n")}
 
-Reply with only the one-line emotional summary about this week, no extra text.`;
+이번 주에 대한 감성적인 한 줄 멘트만 작성해주세요.`;
   } else {
-    prompt = `You are reading a weekly journal entry from Week ${week}, ${year}. Read through the person's week and write a warm, emotional one-line summary or reflection. It should capture the feelings, mood, and essence of this week. Be empathetic, personal, and emotionally resonant. Like a friend who truly understands what this week meant to them. Keep it to ONE SENTENCE ONLY. Make it feel genuine and heartfelt.
+    prompt = `${year}년 ${week}주차의 일기를 읽고 이번 주에 대한 감성적인 한 줄 감상을 작성해주세요. 일기의 감정과 분위기를 담아 따뜻하고 진심이 느껴지는 멘트로 작성해주세요. 축하할 일이 있으면 축하하고, 안타까운 일이 있으면 공감해주세요. 반드시 한 문장으로만 작성하고, 자연스럽고 진솔한 말투로 작성해주세요.
 
-Keywords: ${keywordsText}
-Journal: ${journalText}
+이번 주 키워드: ${keywordsText}
+일기 내용: ${journalText}
 
-Reply with only the one-line emotional summary about this week, no extra text.`;
+이번 주에 대한 감성적인 한 줄 멘트만 작성해주세요.`;
   }
 
   try {
@@ -442,31 +448,28 @@ Reply with only the one-line emotional summary about this week, no extra text.`;
     let content = "";
     
     if (isResponsesAPI(chatUrl)) {
-      const possiblePaths = [
-        data.output?.choices?.[0]?.message?.content,
-        data.choices?.[0]?.message?.content,
-        data.output?.text,
-        data.text,
-        data.output?.content,
-        data.content,
-        data.output,
-        data.response,
-      ];
-      
-      for (const path of possiblePaths) {
-        if (path && typeof path === "string") {
-          content = path;
-          break;
+      // Responses API 응답 형식: output 배열에서 message 타입 찾기
+      if (data.output && Array.isArray(data.output)) {
+        const messageItem = data.output.find(item => item.type === "message" && item.content);
+        if (messageItem && Array.isArray(messageItem.content)) {
+          const textItem = messageItem.content.find(item => item.type === "output_text" && item.text);
+          if (textItem && textItem.text) {
+            content = textItem.text;
+          }
         }
       }
     } else {
+      // Chat Completions API 응답 형식
       content = data.choices?.[0]?.message?.content ||
                 data.choices?.[0]?.content ||
                 "";
     }
 
+    // content를 문자열로 변환하고 trim 적용, 한 줄로만 추출
     const comment = (typeof content === "string" ? content : String(content || "")).trim();
-    res.json({ comment: comment || "A week captured in your memory." });
+    const oneLineComment = comment.split(/\n/)[0].trim(); // 첫 번째 줄만 사용
+    
+    res.json({ comment: oneLineComment || "한 주를 보내며 쌓인 경험이 당신의 이야기가 되어가고 있어요." });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "Server error", message: e.message });
@@ -500,18 +503,18 @@ app.post("/api/recommend", async (req, res) => {
     if (keywordsText) contextParts.push(`Keywords from this week: ${keywordsText}`);
     if (journalText) contextParts.push(`Journal entry: ${journalText}`);
     
-    prompt = `You are a warm, caring friend who reads weekly journals. A friend shared their week:
+    prompt = `이번 주 일기를 읽고 다음 주에 시도해볼 구체적인 액션을 하나 제안해주세요. 일기 내용을 바탕으로 자연스럽고 실현 가능한 추천을 해주세요. 호칭이나 인사말 없이 추천 내용만 한 줄로 작성해주세요.
 
 ${contextParts.join("\n\n")}
 
-Based on this week's journal, suggest ONE concrete action or challenge for NEXT WEEK. It should be something they can do next week. Be warm, personal, and specific. It must be ONE LINE ONLY (no line breaks).`;
+다음 주 추천을 한 줄로만 작성해주세요.`;
   } else {
-    prompt = `You are a warm, caring friend reading a weekly journal. Based on this week's journal, suggest ONE concrete action or challenge for NEXT WEEK. It should be something they can do next week. Be warm, personal, and specific. It must be ONE LINE ONLY.
+    prompt = `이번 주 일기를 읽고 다음 주에 시도해볼 구체적인 액션을 하나 제안해주세요. 일기 내용을 바탕으로 자연스럽고 실현 가능한 추천을 해주세요. 호칭이나 인사말 없이 추천 내용만 한 줄로 작성해주세요.
 
-Keywords: ${keywordsText}
-Journal: ${journalText}
+이번 주 키워드: ${keywordsText}
+일기 내용: ${journalText}
 
-Reply with only ONE recommendation for next week, one line, no extra text.`;
+다음 주 추천을 한 줄로만 작성해주세요.`;
   }
 
   try {
