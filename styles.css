@@ -32,6 +32,18 @@ body {
   padding: 1.5rem 1rem 3rem;
 }
 
+@media (max-width: 768px) {
+  .wrap {
+    padding: 1rem 0.5rem 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wrap {
+    padding: 0.75rem 0.25rem 1.5rem;
+  }
+}
+
 /* Header */
 .header {
   text-align: center;
@@ -118,7 +130,9 @@ section h2 {
 .calendar-wrap {
   width: 100%;
   min-width: 0;
+  max-width: 100%;
   margin-bottom: 1rem;
+  overflow-x: auto;
 }
 
 .calendar-head {
@@ -202,6 +216,67 @@ section h2 {
 @media (min-width: 920px) {
   .year-cells {
     grid-template-columns: repeat(52, minmax(16px, 1fr));
+  }
+}
+
+/* 작은 화면 반응형 */
+@media (max-width: 768px) {
+  .calendar-section {
+    padding: 1rem 0.75rem;
+  }
+  
+  .calendar-head {
+    gap: 1px;
+  }
+  
+  .calendar-body {
+    gap: 1px;
+  }
+  
+  .year-row {
+    gap: 1px;
+  }
+  
+  .month-labels {
+    gap: 1px;
+  }
+  
+  .year-cells {
+    gap: 1px;
+  }
+  
+  .corner,
+  .year-label {
+    width: 30px;
+    min-width: 30px;
+    font-size: 8px;
+  }
+  
+  .month-labels span {
+    font-size: 7px;
+    height: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-section {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .corner,
+  .year-label {
+    width: 26px;
+    min-width: 26px;
+    font-size: 7px;
+  }
+  
+  .month-labels span {
+    font-size: 6px;
+    height: 10px;
+  }
+  
+  .cell {
+    border-radius: 1px;
   }
 }
 
