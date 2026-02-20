@@ -22,6 +22,18 @@ const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STR
 const AZURE_STORAGE_CONTAINER = process.env.AZURE_STORAGE_CONTAINER || "lifegrass";
 
 app.use(express.json());
+
+// CORS 설정 (관리자 페이지에서 API 호출 허용)
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3030");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 function sanitizeUsername(username) {
@@ -304,6 +316,26 @@ app.get("/api/users", async (req, res) => {
   res.json({ users });
 });
 
+// API: 관리자용 유저 데이터 조회 (인증 불필요)
+app.get("/api/admin/data/:username", async (req, res) => {
+  const username = sanitizeUsername(req.params.username);
+  if (!username) {
+    return res.status(400).json({ error: "Invalid username" });
+  }
+  if (!AZURE_STORAGE_CONNECTION_STRING) {
+    return res.status(503).json({ error: "Storage not configured" });
+  }
+  
+  const rawData = await getRawUserData(username);
+  if (rawData === null) {
+    return res.status(404).json({ error: "User not found" });
+  }
+  
+  // 비밀번호 해시는 제외하고 반환
+  const { passwordHash, ...userData } = rawData;
+  res.json(userData);
+});
+
 // API: 유저 삭제 (관리용)
 app.delete("/api/data/:username", async (req, res) => {
   const username = sanitizeUsername(req.params.username);
@@ -332,8 +364,9 @@ function isResponsesAPI(url) {
   return url && url.includes("/responses");
 }
 
-app.post("/api/recommend", async (req, res) => {
-  const { keywords = "", text = "", prompt: customPrompt } = req.body || {};
+// API: AI Comment 생성 (해당 주의 일기를 분석해서 한줄 요약/감상)
+app.post("/api/comment", async (req, res) => {
+  const { keywords = "", text = "", year, week } = req.body || {};
   const chatUrl = getChatUrl();
 
   if (!AZURE_OPENAI_API_KEY || !chatUrl) {
@@ -343,23 +376,126 @@ app.post("/api/recommend", async (req, res) => {
     });
   }
 
-  // 프롬프트 구성
   const journalText = (text || "").trim().slice(0, 1500);
   const keywordsText = (keywords || "").trim();
   
-  // 빈 입력 체크
-  if (!journalText && !keywordsText && !customPrompt) {
+  if (!journalText && !keywordsText) {
+    return res.json({ 
+      comment: "No journal entry for this week." 
+    });
+  }
+  
+  let prompt;
+  if (isResponsesAPI(chatUrl)) {
+    const contextParts = [];
+    if (keywordsText) contextParts.push(`Keywords: ${keywordsText}`);
+    if (journalText) contextParts.push(`Journal entry: ${journalText}`);
+    
+    prompt = `You are reading a weekly journal entry from Week ${week}, ${year}. Read through the person's week and write a warm, emotional one-line summary or reflection. It should capture the feelings, mood, and essence of this week. Be empathetic, personal, and emotionally resonant. Like a friend who truly understands what this week meant to them. Keep it to ONE SENTENCE ONLY. Make it feel genuine and heartfelt.
+
+${contextParts.join("\n\n")}
+
+Reply with only the one-line emotional summary about this week, no extra text.`;
+  } else {
+    prompt = `You are reading a weekly journal entry from Week ${week}, ${year}. Read through the person's week and write a warm, emotional one-line summary or reflection. It should capture the feelings, mood, and essence of this week. Be empathetic, personal, and emotionally resonant. Like a friend who truly understands what this week meant to them. Keep it to ONE SENTENCE ONLY. Make it feel genuine and heartfelt.
+
+Keywords: ${keywordsText}
+Journal: ${journalText}
+
+Reply with only the one-line emotional summary about this week, no extra text.`;
+  }
+
+  try {
+    let body;
+    if (isResponsesAPI(chatUrl)) {
+      body = {
+        model: AZURE_OPENAI_MODEL,
+        input: prompt,
+      };
+    } else {
+      body = {
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 200,
+        temperature: 0.7,
+      };
+    }
+
+    const response = await fetch(chatUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": AZURE_OPENAI_API_KEY,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Azure OpenAI error:", response.status, errText);
+      return res.status(response.status).json({
+        error: "AI request failed",
+        message: response.status === 401 ? "Invalid API key" : errText.slice(0, 200),
+      });
+    }
+
+    const data = await response.json();
+    let content = "";
+    
+    if (isResponsesAPI(chatUrl)) {
+      const possiblePaths = [
+        data.output?.choices?.[0]?.message?.content,
+        data.choices?.[0]?.message?.content,
+        data.output?.text,
+        data.text,
+        data.output?.content,
+        data.content,
+        data.output,
+        data.response,
+      ];
+      
+      for (const path of possiblePaths) {
+        if (path && typeof path === "string") {
+          content = path;
+          break;
+        }
+      }
+    } else {
+      content = data.choices?.[0]?.message?.content ||
+                data.choices?.[0]?.content ||
+                "";
+    }
+
+    const comment = (typeof content === "string" ? content : String(content || "")).trim();
+    res.json({ comment: comment || "A week captured in your memory." });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Server error", message: e.message });
+  }
+});
+
+// API: 다음 주 추천 생성 (현재 주 일기를 기반으로 다음 주에 할 일 추천)
+app.post("/api/recommend", async (req, res) => {
+  const { keywords = "", text = "" } = req.body || {};
+  const chatUrl = getChatUrl();
+
+  if (!AZURE_OPENAI_API_KEY || !chatUrl) {
+    return res.status(500).json({
+      error: "Server not configured",
+      message: "Set AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT in .env",
+    });
+  }
+
+  const journalText = (text || "").trim().slice(0, 1500);
+  const keywordsText = (keywords || "").trim();
+  
+  if (!journalText && !keywordsText) {
     return res.json({ 
       recommendation: "Please write something in your journal to get personalized recommendations." 
     });
   }
   
   let prompt;
-  if (customPrompt) {
-    // 커스텀 프롬프트 사용 (AI Comment용)
-    prompt = customPrompt;
-  } else if (isResponsesAPI(chatUrl)) {
-    // Responses API용 프롬프트 (한줄 추천)
+  if (isResponsesAPI(chatUrl)) {
     const contextParts = [];
     if (keywordsText) contextParts.push(`Keywords from this week: ${keywordsText}`);
     if (journalText) contextParts.push(`Journal entry: ${journalText}`);
@@ -368,15 +504,14 @@ app.post("/api/recommend", async (req, res) => {
 
 ${contextParts.join("\n\n")}
 
-Respond as a close friend would: celebrate their achievements and happy moments, show empathy for difficulties, and offer gentle encouragement. Provide ONE recommendation for next week. It must be ONE LINE ONLY (no line breaks). Be warm, personal, and specific.`;
+Based on this week's journal, suggest ONE concrete action or challenge for NEXT WEEK. It should be something they can do next week. Be warm, personal, and specific. It must be ONE LINE ONLY (no line breaks).`;
   } else {
-    // Chat Completions API용 프롬프트 (한줄 추천)
-    prompt = `You are a warm, caring friend reading a weekly journal. Celebrate achievements, show empathy for difficulties, and offer gentle encouragement. Suggest ONE recommendation for next week. It must be ONE LINE ONLY. Be warm, personal, and specific.
+    prompt = `You are a warm, caring friend reading a weekly journal. Based on this week's journal, suggest ONE concrete action or challenge for NEXT WEEK. It should be something they can do next week. Be warm, personal, and specific. It must be ONE LINE ONLY.
 
 Keywords: ${keywordsText}
 Journal: ${journalText}
 
-Reply with only ONE recommendation, one line, no extra text.`;
+Reply with only ONE recommendation for next week, one line, no extra text.`;
   }
 
   try {

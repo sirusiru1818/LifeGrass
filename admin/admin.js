@@ -20,7 +20,8 @@
 
   async function fetchUserData(username) {
     try {
-      const res = await fetch(`${API_BASE}/api/data/${username}`);
+      // 관리자용 엔드포인트 사용 (인증 불필요)
+      const res = await fetch(`${API_BASE}/api/admin/data/${username}`);
       if (!res.ok) throw new Error("Failed to fetch user data");
       return await res.json();
     } catch (e) {

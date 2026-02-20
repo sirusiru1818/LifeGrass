@@ -225,19 +225,17 @@
     
     const text = journalData.text || "";
     const keywords = journalData.keywords || "";
-    
-    const prompt = `Based on this week's journal entry (Week ${week + 1}, ${year}), write a brief, warm one-line comment or reflection about this week. Be encouraging and personal. Keep it to one sentence.
-
-Keywords: ${keywords}
-Journal: ${text.slice(0, 500)}
-
-Reply with only the one-line comment, no extra text.`;
 
     try {
-      const res = await fetch("/api/recommend", {
+      const res = await fetch("/api/comment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keywords: keywords, text: text, prompt: prompt }),
+        body: JSON.stringify({ 
+          keywords: keywords, 
+          text: text,
+          year: year,
+          week: week + 1
+        }),
       });
       
       if (!res.ok) {
@@ -245,7 +243,7 @@ Reply with only the one-line comment, no extra text.`;
       }
       
       const data = await res.json();
-      const comment = (data.recommendation || "").trim();
+      const comment = (data.comment || "").trim();
       
       if (comment) {
         // 여러 줄이면 첫 번째 줄만 사용
