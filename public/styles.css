@@ -587,6 +587,10 @@ section h2 {
   text-align: center;
 }
 
+.auth-form input[type="number"] {
+  text-align: center;
+}
+
 .auth-form input:focus {
   outline: none;
   border-color: var(--accent);

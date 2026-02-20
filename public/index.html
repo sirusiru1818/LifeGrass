@@ -13,11 +13,6 @@
   <div class="wrap">
     <header class="header">
       <h1 class="title">LifeGrass <span class="user-display" id="userDisplay"></span></h1>
-      <div class="birth-set">
-        <label for="birthYear">Birth year</label>
-        <input type="number" id="birthYear" min="1920" max="2020" value="1995" />
-        <button type="button" id="applyBirth">Apply</button>
-      </div>
     </header>
 
     <main>
@@ -98,6 +93,7 @@
       <div class="auth-form">
         <input type="password" id="authPassword" placeholder="Enter password" autocomplete="new-password" />
         <input type="password" id="authPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" style="display: none;" />
+        <input type="number" id="authBirthYear" placeholder="Birth year" min="1920" max="2020" value="1995" style="display: none;" />
         <p class="auth-error" id="authError"></p>
         <button type="button" class="btn-auth" id="btnAuth">Continue</button>
       </div>

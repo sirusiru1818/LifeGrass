@@ -47,7 +47,7 @@
   function getBirthYear() {
     const saved = localStorage.getItem(getStorageKey("birthYear"));
     if (saved) return parseInt(saved, 10);
-    return parseInt(document.getElementById("birthYear").value, 10) || 1995;
+    return 1995; // 기본값
   }
 
   function setBirthYear(year) {
@@ -590,16 +590,6 @@
     }
   }
 
-  function applyBirthYear() {
-    const input = document.getElementById("birthYear");
-    const year = parseInt(input.value, 10);
-    if (isNaN(year) || year < 1920 || year > 2020) return;
-    setBirthYear(year);
-    const birth = getBirthYear();
-    input.value = birth;
-    renderGrid(birth);
-    saveStateToServer();
-  }
 
   function escapeHtml(s) {
     const div = document.createElement("div");
@@ -658,21 +648,25 @@
     const subtitle = document.getElementById("authSubtitle");
     const passwordInput = document.getElementById("authPassword");
     const confirmInput = document.getElementById("authPasswordConfirm");
+    const birthYearInput = document.getElementById("authBirthYear");
     const btn = document.getElementById("btnAuth");
     const error = document.getElementById("authError");
     const wrap = document.querySelector(".wrap");
 
     if (isNew) {
       title.textContent = `Welcome, @${USERNAME}!`;
-      subtitle.textContent = "This username is available. Set a password to claim it as yours.";
+      subtitle.textContent = "This username is available. Set a password and birth year to claim it as yours.";
       passwordInput.placeholder = "Create a password (4+ characters)";
       confirmInput.style.display = "block";
+      birthYearInput.style.display = "block";
+      birthYearInput.value = "1995";
       btn.textContent = "Create My Page";
     } else {
       title.textContent = `Welcome back, @${USERNAME}`;
       subtitle.textContent = "Enter your password to access your LifeGrass.";
       passwordInput.placeholder = "Enter your password";
       confirmInput.style.display = "none";
+      birthYearInput.style.display = "none";
       btn.textContent = "Login";
     }
 
@@ -698,11 +692,13 @@
   async function handleAuth() {
     const passwordInput = document.getElementById("authPassword");
     const confirmInput = document.getElementById("authPasswordConfirm");
+    const birthYearInput = document.getElementById("authBirthYear");
     const error = document.getElementById("authError");
     const btn = document.getElementById("btnAuth");
 
     const password = passwordInput.value;
     const confirm = confirmInput.value;
+    const birthYear = birthYearInput ? parseInt(birthYearInput.value, 10) : null;
 
     error.textContent = "";
 
@@ -715,6 +711,10 @@
         error.textContent = "Passwords do not match";
         return;
       }
+      if (!birthYear || isNaN(birthYear) || birthYear < 1920 || birthYear > 2020) {
+        error.textContent = "Please enter a valid birth year (1920-2020)";
+        return;
+      }
 
       btn.disabled = true;
       btn.textContent = "Creating...";
@@ -723,7 +723,11 @@
         const res = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: USERNAME, password: password }),
+          body: JSON.stringify({ 
+            username: USERNAME, 
+            password: password,
+            birthYear: birthYear
+          }),
         });
         const data = await res.json();
         
@@ -732,6 +736,7 @@
         }
 
         saveToken(data.token);
+        setBirthYear(birthYear);
         hideAuthModal();
         initApp();
       } catch (e) {
@@ -845,10 +850,8 @@
   }
 
   function initApp() {
-    const input = document.getElementById("birthYear");
     const doneInit = function () {
       const birthYear = getBirthYear();
-      if (input) input.value = birthYear;
       renderGrid(birthYear);
       updateUserDisplay();
       
@@ -876,9 +879,6 @@
       .catch(function () {
         doneInit();
       });
-
-    const applyBtn = document.getElementById("applyBirth");
-    if (applyBtn) applyBtn.addEventListener("click", applyBirthYear);
 
     const modalClose = document.getElementById("modalClose");
     if (modalClose) modalClose.addEventListener("click", closeWeekModal);

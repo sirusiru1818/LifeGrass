@@ -165,7 +165,7 @@ app.get("/api/auth/check/:username", async (req, res) => {
 
 // API: 회원가입 (새 유저 + 비밀번호 설정)
 app.post("/api/auth/register", async (req, res) => {
-  const { username: rawUsername, password } = req.body || {};
+  const { username: rawUsername, password, birthYear } = req.body || {};
   const username = sanitizeUsername(rawUsername || "");
   
   if (!username || username.length < 2) {
@@ -173,6 +173,12 @@ app.post("/api/auth/register", async (req, res) => {
   }
   if (!password || password.length < 4) {
     return res.status(400).json({ error: "Password must be at least 4 characters" });
+  }
+  const validBirthYear = birthYear && !isNaN(birthYear) && birthYear >= 1920 && birthYear <= 2020 
+    ? parseInt(birthYear, 10) 
+    : null;
+  if (!validBirthYear) {
+    return res.status(400).json({ error: "Please provide a valid birth year (1920-2020)" });
   }
   if (!AZURE_STORAGE_CONNECTION_STRING) {
     return res.status(503).json({ error: "Storage not configured" });
@@ -184,7 +190,7 @@ app.post("/api/auth/register", async (req, res) => {
   }
   
   const passwordHash = hashPassword(password);
-  const success = await saveUserData(username, { birthYear: null, filledWeeks: [], journal: {} }, passwordHash);
+  const success = await saveUserData(username, { birthYear: validBirthYear, filledWeeks: [], journal: {} }, passwordHash);
   
   if (!success) {
     return res.status(500).json({ error: "Failed to create user" });
