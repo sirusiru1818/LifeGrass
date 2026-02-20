@@ -1,0 +1,293 @@
+/* LifeGrass - 인생 잔디 */
+
+:root {
+  --bg: #f7f5f0;
+  --grass-empty: #e8e6e0;
+  --grass-past: #a8c69f;
+  --grass-filled: #5a9b4a;
+  --grass-current: #2d5a27;
+  --accent: #3d6b34;
+  --text: #2c2c2c;
+  --text-soft: #5c5c5c;
+  --card: #fff;
+  --shadow: rgba(45, 90, 39, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Noto Sans KR", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-family: "Playfair Display", "Noto Sans KR", serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+  color: var(--accent);
+}
+
+.title-en {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-soft);
+  margin-left: 0.35rem;
+}
+
+.tagline {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  color: var(--text-soft);
+}
+
+.birth-set {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.birth-set label {
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+.birth-set input {
+  width: 5rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--grass-past);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--card);
+}
+
+.birth-set button {
+  padding: 0.4rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.birth-set button:hover {
+  background: var(--grass-current);
+}
+
+/* Sections */
+section {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+section h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: var(--accent);
+}
+
+/* Life calendar - 위에 월(Jan~Dec), 왼쪽에 년도 */
+.calendar-wrap {
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+  padding-bottom: 4px;
+}
+
+.calendar-head {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 2px;
+  min-width: min-content;
+}
+
+.corner {
+  width: 36px;
+  min-width: 36px;
+  flex-shrink: 0;
+}
+
+/* 가로 축: 12개월 영어 (이미지 스타일) */
+.month-labels {
+  display: flex;
+  width: calc(52 * 10px + 51 * 2px);
+  min-width: calc(52 * 10px + 51 * 2px);
+}
+
+.month-labels span {
+  flex: 1;
+  height: 14px;
+  font-size: 9px;
+  color: var(--text-soft);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.calendar-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: min-content;
+}
+
+.year-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.year-label {
+  width: 36px;
+  min-width: 36px;
+  height: 10px;
+  font-size: 9px;
+  color: var(--text-soft);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.year-cells {
+  display: flex;
+  gap: 2px;
+}
+
+.cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--grass-empty);
+  flex-shrink: 0;
+}
+
+.cell.past {
+  background: var(--grass-past);
+}
+
+.cell.filled {
+  background: var(--grass-filled);
+}
+
+.cell.current {
+  background: var(--grass-current);
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0.6; }
+}
+
+.grid-legend {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  margin: 0;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 0.25rem;
+  vertical-align: middle;
+}
+
+.legend-dot.past { background: var(--grass-past); }
+.legend-dot.current { background: var(--grass-current); }
+.legend-dot.filled { background: var(--grass-filled); }
+
+/* Journal */
+.week-label {
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  margin: 0 0 0.5rem;
+}
+
+.journal-section input,
+.journal-section textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--grass-past);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  background: var(--bg);
+}
+
+.journal-section input:focus,
+.journal-section textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn-plant {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--grass-filled);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-plant:hover {
+  background: var(--grass-current);
+}
+
+/* Recommend */
+.recommend-box {
+  min-height: 4rem;
+}
+
+.recommend-box .placeholder {
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--grass-empty);
+}
+
+.footer p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}

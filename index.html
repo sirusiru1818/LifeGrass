@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeGrass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <h1 class="title">LifeGrass</h1>
+      <div class="birth-set">
+        <label for="birthYear">Birth year</label>
+        <input type="number" id="birthYear" min="1920" max="2010" value="1995" />
+        <button type="button" id="applyBirth">Apply</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="calendar-section">
+        <div class="calendar-wrap">
+          <div class="calendar-head">
+            <div class="corner"></div>
+            <div class="month-labels" id="monthLabels"></div>
+          </div>
+          <div class="calendar-body" id="calendarBody"></div>
+        </div>
+        <p class="grid-legend">
+          <span class="legend-dot past"></span> Past weeks
+          <span class="legend-dot current"></span> This week
+          <span class="legend-dot filled"></span> Journaled
+        </p>
+      </section>
+
+      <section class="journal-section">
+        <h2>This week's journal</h2>
+        <p class="week-label" id="weekLabel"></p>
+        <input type="text" id="weekKeywords" placeholder="Keywords for this week (comma-separated)" />
+        <textarea id="weekJournal" placeholder="What you did, learned, and felt this week." rows="4"></textarea>
+        <button type="button" class="btn-plant" id="btnPlant">🌱 Plant</button>
+      </section>
+
+      <section class="recommend-section">
+        <h2>Next week's recommendations</h2>
+        <div class="recommend-box" id="recommendBox">
+          <p class="placeholder">Write your journal and plant to get AI challenge recommendations.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Inspired by Oliver Burkeman's <em>Four Thousand Weeks</em> — life in weeks.</p>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
