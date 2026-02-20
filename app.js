@@ -88,9 +88,10 @@
     const monthLabelsEl = document.getElementById("monthLabels");
     if (monthLabelsEl) {
       monthLabelsEl.innerHTML = "";
-      MONTHS.forEach(function (m) {
+      MONTHS.forEach(function (m, idx) {
         const span = document.createElement("span");
         span.textContent = m;
+        if (idx >= 8) span.classList.add("month-span-5");
         monthLabelsEl.appendChild(span);
       });
     }
@@ -157,7 +158,7 @@
   function applyBirthYear() {
     const input = document.getElementById("birthYear");
     const year = parseInt(input.value, 10);
-    if (isNaN(year) || year < 1920 || year > 2010) return;
+    if (isNaN(year) || year < 1920 || year > 2020) return;
     setBirthYear(year);
     const birth = getBirthYear();
     input.value = birth;

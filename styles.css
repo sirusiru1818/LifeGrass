@@ -1,4 +1,4 @@
-/* LifeGrass - 인생 잔디 */
+/* LifeGrass */
 
 :root {
   --bg: #f7f5f0;
@@ -19,7 +19,7 @@
 
 body {
   margin: 0;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans KR", sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
@@ -27,7 +27,7 @@ body {
 }
 
 .wrap {
-  max-width: 720px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 1.5rem 1rem 3rem;
 }
@@ -39,24 +39,11 @@ body {
 }
 
 .title {
-  font-family: "Playfair Display", "Noto Sans KR", serif;
+  font-family: "Playfair Display", Georgia, serif;
   font-size: 1.75rem;
   font-weight: 600;
-  margin: 0 0 0.25rem;
+  margin: 0 0 1rem;
   color: var(--accent);
-}
-
-.title-en {
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--text-soft);
-  margin-left: 0.35rem;
-}
-
-.tagline {
-  margin: 0 0 1.25rem;
-  font-size: 0.95rem;
-  color: var(--text-soft);
 }
 
 .birth-set {
@@ -81,6 +68,11 @@ body {
   background: var(--card);
 }
 
+.birth-set input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .birth-set button {
   padding: 0.4rem 0.75rem;
   border: none;
@@ -93,6 +85,11 @@ body {
 
 .birth-set button:hover {
   background: var(--grass-current);
+}
+
+.birth-set button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Sections */
@@ -111,18 +108,26 @@ section h2 {
   color: var(--accent);
 }
 
-/* Life calendar - 위에 월(Jan~Dec), 왼쪽에 년도 */
+/* Life calendar - 헤더와 연도 행 그리드 너비 일치, 컨테이너에 맞춤 */
+.calendar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
 .calendar-wrap {
-  overflow-x: auto;
-  margin-bottom: 0.75rem;
-  padding-bottom: 4px;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 1rem;
 }
 
 .calendar-head {
   display: flex;
   align-items: flex-end;
+  gap: 2px;
   margin-bottom: 2px;
-  min-width: min-content;
+  width: 100%;
+  max-width: 100%;
 }
 
 .corner {
@@ -131,15 +136,22 @@ section h2 {
   flex-shrink: 0;
 }
 
-/* 가로 축: 12개월 영어 (이미지 스타일) */
 .month-labels {
-  display: flex;
-  width: calc(52 * 10px + 51 * 2px);
-  min-width: calc(52 * 10px + 51 * 2px);
+  display: grid;
+  grid-template-columns: repeat(52, minmax(0, 1fr));
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+@media (min-width: 920px) {
+  .month-labels {
+    grid-template-columns: repeat(52, minmax(16px, 1fr));
+  }
 }
 
 .month-labels span {
-  flex: 1;
+  grid-column: span 4;
   height: 14px;
   font-size: 9px;
   color: var(--text-soft);
@@ -150,23 +162,27 @@ section h2 {
   text-transform: uppercase;
 }
 
+.month-labels span.month-span-5 {
+  grid-column: span 5;
+}
+
 .calendar-body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: min-content;
+  width: 100%;
 }
 
 .year-row {
   display: flex;
   align-items: center;
   gap: 2px;
+  width: 100%;
 }
 
 .year-label {
   width: 36px;
   min-width: 36px;
-  height: 10px;
   font-size: 9px;
   color: var(--text-soft);
   display: flex;
@@ -176,16 +192,25 @@ section h2 {
 }
 
 .year-cells {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(52, minmax(0, 1fr));
+  flex: 1;
+  min-width: 0;
   gap: 2px;
 }
 
+@media (min-width: 920px) {
+  .year-cells {
+    grid-template-columns: repeat(52, minmax(16px, 1fr));
+  }
+}
+
 .cell {
-  width: 10px;
-  height: 10px;
+  width: 100%;
+  aspect-ratio: 1;
   border-radius: 2px;
   background: var(--grass-empty);
-  flex-shrink: 0;
+  min-height: 0;
 }
 
 .cell.past {
@@ -205,10 +230,23 @@ section h2 {
   50% { opacity: 0.6; }
 }
 
+.calendar-section .grid-legend {
+  align-self: center;
+}
+
 .grid-legend {
   font-size: 0.8rem;
   color: var(--text-soft);
-  margin: 0;
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .legend-dot {
@@ -216,8 +254,7 @@ section h2 {
   width: 8px;
   height: 8px;
   border-radius: 2px;
-  margin-right: 0.25rem;
-  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .legend-dot.past { background: var(--grass-past); }
@@ -267,9 +304,15 @@ section h2 {
   background: var(--grass-current);
 }
 
+.btn-plant:focus-visible {
+  outline: 2px solid var(--grass-current);
+  outline-offset: 2px;
+}
+
 /* Recommend */
 .recommend-box {
-  min-height: 4rem;
+  min-height: 3.5rem;
+  padding: 0.25rem 0;
 }
 
 .recommend-box .placeholder {
@@ -281,8 +324,8 @@ section h2 {
 /* Footer */
 .footer {
   text-align: center;
-  margin-top: 2rem;
-  padding-top: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--grass-empty);
 }
 
@@ -290,4 +333,121 @@ section h2 {
   margin: 0;
   font-size: 0.8rem;
   color: var(--text-soft);
+  line-height: 1.4;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--card);
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-soft);
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.modal-close:hover {
+  background: var(--grass-empty);
+  color: var(--text);
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 1.5rem 1.5rem 1rem;
+  padding-right: 2.5rem;
+}
+
+.modal-body {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.modal-section {
+  margin-bottom: 1.5rem;
+}
+
+.modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.modal-section h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-keywords {
+  font-size: 0.95rem;
+  color: var(--accent);
+  font-weight: 500;
+  margin: 0 0 0.75rem;
+}
+
+.modal-journal {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.modal-insight {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0.75rem;
+  background: var(--bg);
+  border-radius: 6px;
+  border-left: 3px solid var(--grass-filled);
+}
+
+.cell {
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.cell:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 2px var(--accent);
+  z-index: 10;
+  position: relative;
 }

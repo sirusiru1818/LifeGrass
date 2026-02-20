@@ -15,7 +15,7 @@
       <h1 class="title">LifeGrass</h1>
       <div class="birth-set">
         <label for="birthYear">Birth year</label>
-        <input type="number" id="birthYear" min="1920" max="2010" value="1995" />
+        <input type="number" id="birthYear" min="1920" max="2020" value="1995" />
         <button type="button" id="applyBirth">Apply</button>
       </div>
     </header>
@@ -29,11 +29,11 @@
           </div>
           <div class="calendar-body" id="calendarBody"></div>
         </div>
-        <p class="grid-legend">
-          <span class="legend-dot past"></span> Past weeks
-          <span class="legend-dot current"></span> This week
-          <span class="legend-dot filled"></span> Journaled
-        </p>
+        <div class="grid-legend">
+          <span class="legend-item"><span class="legend-dot past"></span>Past weeks</span>
+          <span class="legend-item"><span class="legend-dot current"></span>This week</span>
+          <span class="legend-item"><span class="legend-dot filled"></span>Journaled</span>
+        </div>
       </section>
 
       <section class="journal-section">
@@ -56,6 +56,26 @@
       <p>Inspired by Oliver Burkeman's <em>Four Thousand Weeks</em> — life in weeks.</p>
     </footer>
   </div>
+
+  <!-- Week Detail Modal -->
+  <div class="modal-overlay" id="weekModal" style="display: none;">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <h3 class="modal-title" id="modalTitle">Week Details</h3>
+      <div class="modal-body">
+        <div class="modal-section">
+          <h4>Journal</h4>
+          <p class="modal-keywords" id="modalKeywords"></p>
+          <p class="modal-journal" id="modalJournal"></p>
+        </div>
+        <div class="modal-section">
+          <h4>AI Insight</h4>
+          <p class="modal-insight" id="modalInsight"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
