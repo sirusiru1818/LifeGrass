@@ -54,32 +54,6 @@
 
 ---
 
-## 프로젝트 설정
-
-1. `.env.example`을 `.env`로 복사한 뒤 필요한 값 입력
-2. 의존성 설치 후 프로젝트 실행
-
-```bash
-cp .env.example .env
-# .env 편집 후
-# npm install 또는 pip install -r requirements.txt 등
-```
-
----
-
-## 저장소 (SSH 푸시)
-
-원격 저장소는 SSH로 연결됩니다.
-
-```bash
-# 최초 커밋 후 푸시
-git add .
-git commit -m "Initial commit: LifeGrass 프로젝트"
-git push -u origin main
-```
-
----
-
 ## 라이선스
 
 Private.
